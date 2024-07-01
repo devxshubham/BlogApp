@@ -4,6 +4,9 @@ import { sign, verify } from "hono/jwt";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 
+
+import { PostBlogValidation, UpdateBlogValidation } from "@devxshubham/blogapp-common"
+
 export const blogRouter = new Hono<{
   Bindings: {
     DATABASE_URL: string;
@@ -36,6 +39,8 @@ blogRouter.post("/", async (c) => {
   const authorId  = c.get("userId")
 
   const body = await c.req.json();
+  const {success} = PostBlogValidation.safeParse(body);
+  if( !success ) return c.text("validation error")
 
   try {
     const post = await prisma.post.create({
@@ -61,6 +66,8 @@ blogRouter.put("/", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
+  const {success} = PostBlogValidation.safeParse(body);
+  if( !success ) return c.text("validation error")
 
   try {
     const updatadBlog = await prisma.post.update({
