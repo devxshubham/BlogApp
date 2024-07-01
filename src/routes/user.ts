@@ -4,6 +4,8 @@ import { sign } from "hono/jwt";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 
+import { SigninValidation, SignupValidation } from "@devxshubham/blogapp-common";
+
 export const userRouter = new Hono<{
   Bindings: {
     DATABASE_URL: string;
@@ -16,12 +18,9 @@ userRouter.post("/signup", async (c) => {
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  const body: {
-    password: string;
-    username: string;
-    name: string;
-    email: string;
-  } = await c.req.json();
+  const body = await c.req.json();
+  const {success} = SignupValidation.safeParse(body)
+  if( !success) return c.text("validation error")
 
   try {
     const newUser = await prisma.user.create({
@@ -56,6 +55,8 @@ userRouter.post("/signin", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
+  const {success} = SigninValidation.safeParse(body)
+  if( !success) return c.text("validation error")
   const user = await prisma.user.findUnique({
     where: {
       username: body.username,

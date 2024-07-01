@@ -66,7 +66,7 @@ blogRouter.put("/", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
-  const {success} = PostBlogValidation.safeParse(body);
+  const {success} = UpdateBlogValidation.safeParse(body);
   if( !success ) return c.text("validation error")
 
   try {
