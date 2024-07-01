@@ -1,11 +1,12 @@
 {
   "name": "backend",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "dev": "wrangler dev src/index.ts",
     "deploy": "wrangler deploy --minify src/index.ts"
   },
   "dependencies": {
+    "@devxshubham/blogapp-common": "^1.0.1",
     "@prisma/client": "^5.16.0",
     "@prisma/extension-accelerate": "^1.1.0",
     "hono": "^4.4.9",
