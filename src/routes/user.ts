@@ -4,7 +4,7 @@ import { sign } from "hono/jwt";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 
-import { SigninValidation, SignupValidation } from "@devxshubham/blogapp-common";
+import { SignInValidation, SignUpValidation } from "@devxshubham/blogapp-common";
 
 export const userRouter = new Hono<{
   Bindings: {
@@ -19,7 +19,8 @@ userRouter.post("/signup", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
-  const {success} = SignupValidation.safeParse(body)
+  const success = SignUpValidation.safeParse(body)
+  console.log(success.error)
   if( !success) return c.text("validation error")
 
   try {
@@ -32,13 +33,11 @@ userRouter.post("/signup", async (c) => {
       },
       select: {
         id : true,
-        username: true,
-        email: true,
       },
     });
     const payload = {
       id : newUser.id,
-      exp: Math.floor(Date.now() / 1000) + 60 * 30, // Token expires in 5 minutes
+      exp: Math.floor(Date.now() / 1000) + 60 * 30, // Token expires in  minutes
     };
     const token = await sign(payload, c.env?.JWT_SECRET, "HS256");
 
@@ -55,7 +54,7 @@ userRouter.post("/signin", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
-  const {success} = SigninValidation.safeParse(body)
+  const {success} = SignInValidation.safeParse(body)
   if( !success) return c.text("validation error")
   const user = await prisma.user.findUnique({
     where: {
